@@ -15,6 +15,7 @@ import cc.mallet.topics.ParallelTopicModel;
 import cc.mallet.types.Alphabet;
 import cc.mallet.types.FeatureSequence;
 import cc.mallet.types.IDSorter;
+import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 import cc.mallet.types.LabelSequence;
 import java.io.BufferedWriter;
@@ -40,8 +41,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import malletData.Data;
+import static malletStuff.topicModeling.LDA.sortByValues;
 
 /**
  *
@@ -59,49 +63,78 @@ public class MalletLDA {
     private ParallelTopicModel model;
     
     public MalletLDA() {
-        model = new ParallelTopicModel(numTopics, alpha_t, beta_w );
+        
     }
     
     
-    public void runTopicModel(String[] args) throws UnsupportedEncodingException, FileNotFoundException, IOException {
-        
-        preparePipelist(args); //pipeList is ready
-        
-        //EACH MODEL HAS ITS OWN INSTANCES AND INSTANCELIST
-        InstanceList instances = new InstanceList(new SerialPipes(pipeList));
-        Reader fileReader = new InputStreamReader(new FileInputStream(new File(args[0])), "UTF-8");
-        instances.addThruPipe(new CsvIterator(fileReader, Pattern.compile("^(\\S*)[\\s,]*(\\S*)[\\s,]*(.*)$"),
-                3, 2, 1)); // data, label, name fields
-        
-        int numInstances = instances.size(); //numberInstances
-        System.out.println(numInstances); //basically number of documents 
-        
+    
    
+   
+
+   
+   
+   
+   
+    //CODING FOR INDIVIDUAL CATEGORIES
+   
+   
+   
+   
+   private  void _buildTopicModel(List<Instance> data) {
+       model = new ParallelTopicModel(numTopics, alpha_t, beta_w );
+       preparePipelist();
+       InstanceList instances = new InstanceList(new SerialPipes(pipeList));
+       
+       
+       //Create Instances and Add
+       Instance instance = null;
+       for(Instance ins:data)
+           instances.addThruPipe(ins);
+       
+       
+       
         model.addInstances(instances);
         model.setNumThreads(numThreads);
         model.setNumIterations(numIter);
-        model.estimate();
+        try {
+            model.estimate();
+        } catch (IOException ex) {
+            Logger.getLogger(MalletLDA.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
-        //Analyze MODEL PROPERTIES
-        
-        //basic info on the alphabet
-        analyzeAlphabet();
         
         
-        //get top terms in the corpus 
-        //getTopWords(100000);
-    } 
-    
-    
-    
-    public ParallelTopicModel getTopicModel() {
-        return model;
+        //EXPT 2
+          //basic info on the alphabet
+        try {
+          
+             analyzeAlphabet();
+        } catch (IOException ex) {
+            Logger.getLogger(MalletLDA.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
-    }
-    
-    
-    
-    public void analyzeAlphabet() throws IOException {
+        
+        
+        
+        //EXPT 2
+        
+        try {
+            //GET TOP WORDS 
+            //get top terms in the corpus 
+            getTopWords(100000);
+        } catch (IOException ex) {
+            Logger.getLogger(MalletLDA.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
+        
+   } //_buildTopicModel
+   
+   
+   
+   
+  
+   public void analyzeAlphabet() throws IOException {
         BufferedWriter bw = new BufferedWriter (new FileWriter(new File(Data.malletDataBpDir + "alphabet.txt")));
         
         Formatter formatter = new Formatter(bw, Locale.US);
@@ -118,22 +151,9 @@ public class MalletLDA {
         formatter.flush();
         formatter.close();
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    public void getTopWords(int numWords_) throws IOException {
+   
+   
+       public void getTopWords(int numWords_) throws IOException {
         
         StringBuilder sb = new StringBuilder();
         BufferedWriter bw = new BufferedWriter (new FileWriter(new File(Data.malletDataBpDir + "rinput.txt")));
@@ -174,6 +194,73 @@ public class MalletLDA {
         
         
     } //getTopWords
+   
+
+    public void  trainLDA(Data.CatNames cat,Data.Categories categ, String rawConFile,String rawNonCFile ) {
+        System.out.println("Training for " + cat +" " + categ);
+        prepareData(cat.toString(),categ.toString(),rawConFile,rawNonCFile);
+        
+    } //trainLDA
+    
+    
+      /*
+    * catname violence crime etc
+    * category contro or nontro
+    * cFile file containing contro data
+    * ncFile file containing noncontro data
+    * 
+    */
+   private  void prepareData(String catname, String category, String cFile, String ncFile) {
+       if(category.equals("Controversial")) { 
+           System.out.println("We only need Controversial");
+           List<Instance> data = getControversialData(catname,category,cFile);
+           //Now that you have data, go one and build the TOPIC MODEL
+           _buildTopicModel(data);
+           
+       } else if (category.equals("NonControversial")) {
+            System.out.println("We only need NON Controversial");
+            
+       } else if (category.equals("All")) {
+            
+           System.out.println("We  need Both ");
+       }
+   } //prepareData
+    
+    
+    
+    
+    
+    
+     private  List<Instance> getControversialData(String catname, String category,String fileName) {
+       List<Instance> data = new ArrayList<>();
+       DataPreparer dp = new DataPreparer();
+       //open the file , read and compare with category 
+       data = dp.getData(catname,category,fileName);
+       //printData(data);
+       return data;
+   } //getControversialData
+   
+   
+   private void printData(List<?> list) {
+       //past any type of list
+       for(Object o:list) {
+           System.out.println(o.toString());
+       }
+       System.out.println();
+   } // printData
+    
+    
+    
+    
+     private  void preparePipelist() {
+        pipeList = new ArrayList<Pipe>();
+        // Pipes: lowercase, tokenize, remove stopwords, map to features
+        pipeList.add(new CharSequenceLowercase());
+        pipeList.add(new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")));
+        //pipeList.add(new TokenSequenceRemoveStopwords(new File(args[1]+"stoplists/en.txt"), "UTF-8", false, false, false));
+        pipeList.add(new TokenSequenceRemoveStopwords(new File(Data.malletDir+"stoplists/en.txt"), "UTF-8", false, false, false));
+        pipeList.add(new TokenSequence2FeatureSequence());
+    } //preparePipelist
     
     
     
@@ -183,9 +270,8 @@ public class MalletLDA {
     
     
     
-    
-    //Define a generic method to sort HashMap by VALUE Values can be repeated and be null while keys are unique n not-null
-   public static <K extends Comparable,V extends Comparable> LinkedHashMap<K,V> sortByValues(Map<K,V> map) {
+     //Define a generic method to sort HashMap by VALUE Values can be repeated and be null while keys are unique n not-null
+   public  <K extends Comparable,V extends Comparable> LinkedHashMap<K,V> sortByValues(Map<K,V> map) {
        java.util.List<Map.Entry<K,V>> entries = new LinkedList<Map.Entry<K,V>>(map.entrySet());
        
        Collections.sort(entries, new Comparator<Map.Entry<K,V>>() {
@@ -209,78 +295,6 @@ public class MalletLDA {
       
    } 
  
-
-   private static List<String> getControversialData(String catname, String fileName) {
-       List<String> data = new ArrayList<>();
-       DataPreparer dp = new DataPreparer();
-       //open the file , read and compare with category 
-       data = dp.getData(catname,fileName);
-       
-       
-       return data;
-   }
-   
-   private static void prepareData(String catname, String category, String cFile, String ncFile) {
-       if(category.equals("Controversial")) { 
-           System.out.println("We only need Controversial");
-           List<String> data = getControversialData(catname,cFile);
-           
-           
-       } else if (category.equals("NonControversial")) {
-            System.out.println("We only need NON Controversial");
-            
-       } else if (category.equals("All")) {
-            
-           System.out.println("We  need Both ");
-       }
-       
-       
-   }
-
-    public static void  trainLDA(Data.CatNames cat,Data.Categories categ, String rawConFile,String rawNonCFile ) {
-        System.out.println("Training for " + cat +" " + categ);
-        prepareData(cat.toString(),categ.toString(),rawConFile,rawNonCFile);
-        
-    } //trainLDA
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    private void preparePipelist(String[] args) {
-        pipeList = new ArrayList<Pipe>();
-        // Pipes: lowercase, tokenize, remove stopwords, map to features
-        pipeList.add(new CharSequenceLowercase());
-        pipeList.add(new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")));
-        pipeList.add(new TokenSequenceRemoveStopwords(new File(args[1]+"stoplists/en.txt"), "UTF-8", false, false, false));
-        pipeList.add(new TokenSequence2FeatureSequence());
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     
     

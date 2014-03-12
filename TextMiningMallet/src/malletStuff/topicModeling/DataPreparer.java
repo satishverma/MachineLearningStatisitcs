@@ -4,6 +4,7 @@
  */
 package malletStuff.topicModeling;
 
+import cc.mallet.types.Instance;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -31,13 +32,13 @@ public class DataPreparer {
     
     
     /*
-     * 
-     * 
+     * cat crime violence etc 
+     * category contro noncontro all 
      * 
      */
-    public List<String> getData(String cat,String in) {
+    public List<Instance> getData(String cat, String category,String in) {
         
-        List<String> data = new ArrayList<String>();
+        List<Instance> data = new ArrayList<Instance>();
         /*
          * 1. Read the file , filter the lines which have category cat and put in data
          * 
@@ -47,8 +48,11 @@ public class DataPreparer {
          System.out.println("PreparingData " +cat+" "+in);
          Scanner scan;
          String line;
+         String lineProcessed;
+         Instance instance;
          try {
 		   scan = new Scanner(new BufferedReader(new FileReader(in)));
+                   int count=0;
                    while(scan.hasNextLine()) {
 		    	line = scan.nextLine();
 		    	line = line.trim();
@@ -57,7 +61,10 @@ public class DataPreparer {
                         if(lineList[lineList.length-1].toLowerCase().equals(cat.toLowerCase())) {
                             if(_debugInfo)
                             System.out.println(_processCont(lineList[0]));
-                            data.add(_processCont(lineList[0]));
+                            lineProcessed = _processCont(lineList[0]); //String
+                            instance = new Instance(lineProcessed,category,String.valueOf(count),null);
+                            data.add(instance);
+                            count++;
                         }
                         
                    } //while

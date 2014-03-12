@@ -62,22 +62,15 @@ public class TopicModel {
         //Run Topic Model using ap.txt 
         String[] argsC = {Data.malletDataBpDir + "dataC.txt", Data.malletDir};
         String[] argsNC = {Data.malletDataBpDir + "dataNC.txt", Data.malletDir};
-        
-        
-        
-        
-        
-        //TMAPData apC = new TMAPData();
-        //TMAPData apNC = new TMAPData();
-        
-        
+
         /*
-         * EXPT 2 
+         * EXPT 1
          * 
          * Run for Controversial Stuff
          * 
          * 
          */
+        //LDA apC = new LDA();
         //System.out.println("Running for Contro Stuff");
         //apC.runTopicModel(argsC); //create model for controversial stuff
         
@@ -88,6 +81,7 @@ public class TopicModel {
          * Run for NonControversial Stuff
          * 
          */
+        //LDA apNC = new LDA();
         //System.out.println("Running for NON Contro Stuff");
         //apNC.runTopicModel(argsNC); //create model for non-controversial stuff 
         
@@ -104,10 +98,12 @@ public class TopicModel {
          String rawConFile = Data.malletDataBpDir+"contro/controversialTitles";
          String rawNonCFile = Data.malletDataBpDir +"noncontro/nonControversial";
          
+         MalletLDA mLDA = new MalletLDA();
+         
          for (Data.CatNames cat: Data.CatNames.values()) {
              for (Data.Categories categ: Data.Categories.values()) {
                 //System.out.println(cat + " " + categ); 
-                MalletLDA.trainLDA(cat,categ, rawConFile, rawNonCFile );
+                mLDA.trainLDA(cat,categ, rawConFile, rawNonCFile );
              }
          }
         
