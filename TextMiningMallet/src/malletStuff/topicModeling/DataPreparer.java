@@ -26,6 +26,7 @@ public class DataPreparer {
     
     public DataPreparer() {
         buildStopMap(Data.stopWordsFile);
+        addToStopMap(Data.wordsToFilter);
         _debugInfo= false;
         
     } //Constructor
@@ -57,14 +58,22 @@ public class DataPreparer {
 		    	line = scan.nextLine();
 		    	line = line.trim();
 		    	String[] lineList = line.split(":");
+                        //System.out.println(lineList[0].trim().toLowerCase());
+                        line = lineList[0].trim().toLowerCase();
+                        //System.out.println(line);
                        
                         if(lineList[lineList.length-1].toLowerCase().equals(cat.toLowerCase())) {
                             if(_debugInfo)
-                            System.out.println(_processCont(lineList[0]));
-                            lineProcessed = _processCont(lineList[0]); //String
-                            instance = new Instance(lineProcessed,category,String.valueOf(count),null);
-                            data.add(instance);
-                            count++;
+                                System.out.println(_processCont(lineList[0].trim().toLowerCase()));
+                            
+                            //PASS THE STRING and GET A PROCESSED STRING
+                            lineProcessed = _processCont(lineList[0].trim().toLowerCase()); //String
+                            if (lineProcessed != null) {
+                                instance = new Instance(lineProcessed, category, String.valueOf(count), null);
+
+                                data.add(instance);
+                                count++;
+                            }//if
                         }
                         
                    } //while
@@ -85,19 +94,35 @@ public class DataPreparer {
     
     
     private String _processCont(String input) {
+        
+        //System.out.println(input);
+        
         String[] sList = input.split("\\s+"); 
-        StringBuilder sb = new StringBuilder("");
-        String tmp;
+        StringBuilder sb = new StringBuilder();
+        String[] tmpArr; String tmp1="";
+        
         
         for(String s:sList) {
-            tmp = s.trim().toLowerCase();
-            tmp = replaceStuff(tmp);
-            tmp = replaceStuff(tmp);
-            if(!stopwordsMap.containsKey(tmp))
-                sb.append(tmp+" ");
+            
+            tmpArr = replaceStuff(s);
+            if(tmpArr!=null) {
+               //This implies that tmpArr has one or more elements 
+               //pick an element at a time n make decision
+               for(String t:tmpArr) {
+                   if(!stopwordsMap.containsKey(t.trim())) {
+                       sb.append(t+' ');
+                   } //if
+               } //for
+                
+            }//if
+          
+        } //for
+        System.out.println(sb.toString());
+        if(sb.toString().trim().length()>0) {
+            return sb.toString();
+        } else {
+            return null;
         }
-        
-        return sb.toString();
     } //_process
     
     
@@ -163,9 +188,9 @@ public class DataPreparer {
 	
     
     
-      private  String replaceStuff(String str) {
+      private  String[] replaceStuff(String str) {
 
-        if(str.length()<3) return "";
+        if(str.length()<3) return null;
         str = str.replace("%20", " ");
         str = str.replace("&apos;", " ");
         str = str.replace("'s", "");
@@ -193,7 +218,18 @@ public class DataPreparer {
         str = str.replaceAll("\\d+", " ") ; //str.matches("[0-9]+")
         str.trim();
 
-        return str;
+        
+        return str.split("\\s+");
     }
+      
+      
+      private static void addToStopMap(String[] wordsToFilter) {
+		for(String s:wordsToFilter) {
+			stopwordsMap.put(s, true);
+			//System.out.println(s);
+		}
+	}
+        
+      
     
 }

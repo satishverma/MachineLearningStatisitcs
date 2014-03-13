@@ -35,11 +35,18 @@ public class Data {
     }
     
     public enum CatNames {
-        Violence
+      Crime
     }
     
     public enum Categories { 
         Controversial
     }
+    
+    
+    
+    
+    public static String[] wordsToFilter = {"null","part","video","episode","review"};
+            
+    
     
 } //Data

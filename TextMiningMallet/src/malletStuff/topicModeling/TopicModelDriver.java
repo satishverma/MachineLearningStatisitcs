@@ -28,17 +28,17 @@ import malletData.Data;
  * 
  * /home/sverma/work/mallet/expt/data/bp  BP TITLE DATA 
  */
-public class TopicModel {
+public class TopicModelDriver {
     
     public static void main(String[] args) throws Exception {
         try {
             runAP();
         } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(TopicModel.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TopicModelDriver.class.getName()).log(Level.SEVERE, null, ex);
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(TopicModel.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TopicModelDriver.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(TopicModel.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TopicModelDriver.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         
