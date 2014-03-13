@@ -1,0 +1,18 @@
+
+def count(fName):
+	f=open(fName,"r")
+	wordDict={}
+	for line in f.readlines():
+		line= line.replace("\n","")
+		lineAsList=line.split("\t")
+		print lineAsList
+		if (lineAsList[0] in wordDict):
+			wordDict[lineAsList[0]] = int(wordDict[lineAsList[0]])+1
+		else:
+			wordDict[lineAsList[0]]= int(lineAsList[1])
+	print wordDict
+
+
+if __name__=="__main__":
+	print "HI"
+	count("a")

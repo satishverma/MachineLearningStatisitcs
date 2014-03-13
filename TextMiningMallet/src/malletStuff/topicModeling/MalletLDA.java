@@ -54,8 +54,8 @@ import static malletStuff.topicModeling.LDA.sortByValues;
 public class MalletLDA {
 
     
-    private static int numTopics = 50;
-    private static int numIter = 500;
+    private static int numTopics = 250;
+    private static int numIter = 2500;
     private static int numThreads = 5;
     private static double alpha_t = 2; //defualt for the expt was 1
     private static double beta_w = 0.001;
@@ -121,15 +121,41 @@ public class MalletLDA {
         try {
             //GET TOP WORDS 
             //get top terms in the corpus 
-            getTopWords(100000);
+            getTopWords(99999999);
         } catch (IOException ex) {
             Logger.getLogger(MalletLDA.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         
         
+        
+        //EXPT 3 
+        System.out.println("Model Num Topics " + model.numTopics);
+        int nWords = 10000;
+        String topWords = model.displayTopWords(nWords, true);
+        //System.out.println(topWords);
+        
+        Formatter formatter = null;
+        try {
+            BufferedWriter bw = new BufferedWriter (new FileWriter(new File(Data.malletDataBpDir + "modelDisplayTopWords.txt")));
+            formatter = new Formatter(bw, Locale.US);
+            formatter.format("%s", topWords);
+        } catch (IOException ex) {
+            Logger.getLogger(MalletLDA.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if(formatter!=null) {
+            formatter.flush();
+            formatter.close();
+        }
+        
+        
+        
+        
+        //Expt 4
+        //KeyWord based Research IDEA
+        
+        
    } //_buildTopicModel
-   
    
    
    
@@ -168,7 +194,7 @@ public class MalletLDA {
             System.out.println("Topic " +i+" ");
             for (int j=0;j<topWords[i].length;j++) {
                 s=topWords[i][j].toString();
-                System.out.println(s);
+                System.out.println(s + topWords[i].length);
                 if(wordCount.containsKey(s)) {
                     wordCount.put(s, wordCount.get(s)+1);
                 } else {

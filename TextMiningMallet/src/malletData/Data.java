@@ -34,6 +34,8 @@ public class Data {
         Controversial, NonControversial, All
     }
     
+    
+    //THIS IS WHAT WE ARE USING
     public enum CatNames {
       Crime
     }
@@ -42,7 +44,9 @@ public class Data {
         Controversial
     }
     
-    
+    public enum SourceType {
+        Controversial,NonControversial
+    }
     
     
     public static String[] wordsToFilter = {"null","part","video","episode","review"};
