@@ -51,15 +51,26 @@ public class KeywordBasedTextScore {
      */
     public List<String> prepareCData() {
         //get all the data which has the given keyword
+        List<String> tempList =  fileUtil.readFile(this.cFile);
+        String tmp;
+        for(String s:tempList) {
+            tmp = _process(s,Data.SourceType.Controversial);
+            cData.add(tmp);
+        }
+        return cData;
+    } //prepareCData
+    
+    
+    
+     public List<String> prepareNCData() {
         List<String> tempList =  fileUtil.readFile(this.ncFile);
         String tmp;
         for(String s:tempList) {
             tmp = _process(s,Data.SourceType.NonControversial);
-            tempList.add(tmp);
+            ncData.add(tmp);
         }
-        return tempList;
-    } //prepareCData
-    
+        return ncData;
+    } //prepareNCData
     
     
     public String _process(String s, Data.SourceType cat) {
@@ -67,12 +78,14 @@ public class KeywordBasedTextScore {
         String res =null ;
         if(cat == Data.SourceType.Controversial) {
             if(_debug==true) {
-                System.out.println("Controversial");
+                //System.out.println("Controversial");
+                res = _processCont(s);
+                System.out.println(res);
             }
         }
         if(cat == Data.SourceType.NonControversial) {
             if(_debug==true) {
-                System.out.println("NonControversial");
+                //System.out.println("NonControversial");
             }
         }
         
@@ -129,15 +142,7 @@ public class KeywordBasedTextScore {
     
     
     
-    public List<String> prepareNCData() {
-        List<String> tempList =  fileUtil.readFile(this.ncFile);
-        String tmp;
-        for(String s:tempList) {
-            tmp = _process(s,Data.SourceType.NonControversial);
-            tempList.add(tmp);
-        }
-        return tempList;
-    } //prepareNCData
+   
     
     
     public void computeScores() {
@@ -220,7 +225,7 @@ public class KeywordBasedTextScore {
         driver.setStopWordsMap(stopwordsMap_);
         
         driver.prepareCData();
-        driver.prepareNCData();
+        //driver.prepareNCData();
         driver.computeScores();
         
     } //main
