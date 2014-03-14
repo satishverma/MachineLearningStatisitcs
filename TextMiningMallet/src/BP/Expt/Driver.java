@@ -6,6 +6,7 @@ package BP.Expt;
 
 import BP.Data.ControversialData;
 import BP.Data.Data;
+import BP.Data.Definitions;
 
 /**
  *
@@ -27,14 +28,11 @@ public class Driver {
          *   
          */
         
-         ControversialData data = new ControversialData();
-         data.setDebugOn();
-         
+         Data data = new ControversialData();
+         data.setDebugOn();   
          data.setSubCat(Data.SUBCATEGORY.CRIME);
          data.setKW("Arrested");
-         
-         
-         data.prepareData();
+         data.prepareData(Definitions.dataC);
          
         
     } //main

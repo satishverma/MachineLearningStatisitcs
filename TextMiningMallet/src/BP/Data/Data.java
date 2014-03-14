@@ -28,6 +28,7 @@ public abstract class Data {
     protected List<SUBCATEGORY> subCatList;
     protected CATEGORY category; 
     protected boolean debugOn = false;
+    protected List<String> ldaInputData;
 
     public Data() {
         debugOn=false;
@@ -41,7 +42,7 @@ public abstract class Data {
     }
     
     public void setKW(String kw) {
-        this.kwList.add(kw);
+        this.kwList.add(kw.toLowerCase());
     }
     
     public void setDebugOn() {
@@ -54,5 +55,5 @@ public abstract class Data {
     
     
     //call this func to read and populate
-    protected abstract void prepareData();
+    public abstract void prepareData(String path);
 }
