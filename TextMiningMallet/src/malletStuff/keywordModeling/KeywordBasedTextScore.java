@@ -4,10 +4,15 @@
  */
 package malletStuff.keywordModeling;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import mallet.FileStuff.FileUtilities;
 import mallet.FileStuff.StopWordsUtil;
 import malletData.Data;
@@ -20,7 +25,7 @@ public class KeywordBasedTextScore {
     
     private String kw; //for examples "Arrested"
     private HashMap<String,Integer> topWordsMap;
-    private String cFile;
+    private String cFile; //cData is the list of all data containing the kw for a given cat 
     private String ncFile;
     private ArrayList<String> cData;
     private ArrayList<String> ncData;
@@ -28,15 +33,17 @@ public class KeywordBasedTextScore {
     private boolean _debug = false;
     private Map<String, Boolean> stopwordsMap;
     
-    public KeywordBasedTextScore(String keyword_, HashMap<String,Integer> topWordsMap_, String cFile_, String ncFile_, boolean debug) {
+    
+    public KeywordBasedTextScore(String keyword_, String cFile_, String ncFile_, boolean debug) {
         this.kw = keyword_;
-        this.topWordsMap=topWordsMap_;
+     
         this.cFile=cFile_;
         this.ncFile=ncFile_;
         this._debug=debug;
         fileUtil = new FileUtilities();
         cData = new ArrayList<>();
         ncData = new ArrayList<>();
+        topWordsMap = new HashMap<String,Integer>();
     } //constructor
     
     public void setStopWordsMap(Map<String, Boolean> stopwordsMap_) {
@@ -55,7 +62,12 @@ public class KeywordBasedTextScore {
         String tmp;
         for(String s:tempList) {
             tmp = _process(s,Data.SourceType.Controversial);
-            cData.add(tmp);
+            if(tmp!=null && tmp.contains(this.kw)) {
+                if(_debug==true) {
+                    System.out.println(tmp);
+                }
+                cData.add(tmp);
+            }
         }
         return cData;
     } //prepareCData
@@ -67,7 +79,13 @@ public class KeywordBasedTextScore {
         String tmp;
         for(String s:tempList) {
             tmp = _process(s,Data.SourceType.NonControversial);
-            ncData.add(tmp);
+            if(tmp!=null && tmp.contains(this.kw)) {
+                if(_debug==true) {
+                    System.out.println(tmp);
+                }
+                //System.out.println(tmp);
+                ncData.add(tmp);
+            }
         }
         return ncData;
     } //prepareNCData
@@ -77,16 +95,29 @@ public class KeywordBasedTextScore {
         
         String res =null ;
         if(cat == Data.SourceType.Controversial) {
+            
+            //Split with ":" and process only the title for now
+            
+            String title = getTitleC(s);
+            
+            res = _processStr(title);
             if(_debug==true) {
                 //System.out.println("Controversial");
-                res = _processCont(s);
                 System.out.println(res);
             }
         }
+        
+        
         if(cat == Data.SourceType.NonControversial) {
             if(_debug==true) {
                 //System.out.println("NonControversial");
             }
+            String title = getTitleNC(s);
+            if(_debug==true) {
+                System.out.println(title);
+            }
+            
+            res = _processStr(title);
         }
         
         
@@ -96,7 +127,43 @@ public class KeywordBasedTextScore {
     
     
     
-     private String _processCont(String input) {
+    
+    
+    public String getTitleC(String input) {
+        String[] inArr = input.split(":");
+        int index=0; String res="";
+        for(int i=0;i<inArr.length;i++) {
+            if (inArr[i].toLowerCase().equals("controversial")) {
+                index=i;
+                break;
+            }
+        }
+        for(int i=0;i<index;i++){
+            res = res+inArr[i];
+        }
+        return res;
+        //get where controversial is present 
+    }//getTitleC
+    
+    
+    
+    public String getTitleNC(String input) {
+        String[] inArr = input.split(":");
+        int index=0; String res="";
+        for(int i=0;i<inArr.length;i++) {
+            if (inArr[i].toLowerCase().equals("noncontroversial")) {
+                index=i;
+                break;
+            }
+        }//for
+        for(int i=0;i<index;i++){
+            res = res+inArr[i];
+        }
+        return res;
+        
+    } //getTitleNC
+    
+     private String _processStr(String input) {
         
         //System.out.println(input);
         
@@ -120,9 +187,9 @@ public class KeywordBasedTextScore {
             }//if
           
         } //for
-        System.out.println(sb.toString());
+        //System.out.println(sb.toString());
         if(sb.toString().trim().length()>0) {
-            return sb.toString();
+            return sb.toString().toLowerCase();
         } else {
             return null;
         }
@@ -147,17 +214,94 @@ public class KeywordBasedTextScore {
     
     public void computeScores() {
         //compute score for each cData and ncData 
-        // 
+        
+        int threshold = 0;
+        //we have to analyze the scores also 
+        List<Integer> cList = new ArrayList<Integer>();
+        List<Integer> ncList = new ArrayList<Integer>();
         
         for(String s:cData) {
+            //Controversial
+            //tokenize
+            int weight=0;
             
+            String[] sArr = s.split("\\s+");
+            for(String s_:sArr) {
+                if(this.topWordsMap.containsKey(s_.trim())) {
+                    weight+=this.topWordsMap.get(s_.trim());
+                   // weight++;
+                }
+            }
+            if(sArr.length>0){
+               // weight = weight/sArr.length;
+            }
+            if(weight>threshold) {
+                System.out.println(s+" "+weight +" C");
+                 cList.add(weight);
+            }
         }
         for(String s:ncData) {
+            //NonControversial
+            int weight=0;
+            String[] sArr = s.split("\\s+");
+            for(String s_:sArr) {
+                if(this.topWordsMap.containsKey(s_.trim())) {
+                   weight+=this.topWordsMap.get(s_.trim());
+                   //weight++;
+                }
+            }
+            if(sArr.length>0){
+               //weight = weight/sArr.length;
+            }
+            if(weight>threshold) {
+                System.out.println(s+" "+weight +" NC");
+                ncList.add(weight);
+            }
             
         }
         
+        analyzeWeights(cList,ncList);
         
     } //computeScores
+    
+    
+    
+    private void analyzeWeights(List<Integer> cList,List<Integer> ncList) {
+        int cSize = cList.size();
+        int ncSize = ncList.size();
+        System.out.println("Length of Cont data "+cSize);
+        Collections.sort(cList);
+        Collections.sort(ncList);
+        System.out.println("Length of NCont data "+ncSize);
+        Integer[] cArr = new Integer[cSize];
+        cArr = cList.toArray(cArr);
+        Integer[] ncArr = new Integer[ncSize];
+        ncArr = ncList.toArray(ncArr);
+        System.out.println("Range Cont " + cArr[0]+" "+cArr[cArr.length-1] +" Avg "+ arrAvg(cArr));
+        printInterval(cArr);
+        System.out.println("Range NCont " + ncArr[0]+" "+ncArr[ncArr.length-1]+" Avg "+ arrAvg(ncArr));
+        printInterval(ncArr);
+    }
+    
+    
+    private void printInterval(Integer[] arr) {
+        int min = arr[0];
+        int max = arr[arr.length-1];
+        int interval = 5;
+        int i=0;
+        while(i<=arr.length) {
+            System.out.print(arr[i]+" ");
+            i+=interval;
+        }
+        System.out.println();
+    }
+    
+    
+    private double arrAvg(Integer[] arr) {
+        double sum=0.0;
+        for(Integer i:arr) sum+=i;
+        return sum/arr.length;
+    }
     
     
      public String[] replaceStuff(String str) {
@@ -168,11 +312,12 @@ public class KeywordBasedTextScore {
         str = str.replace("'s", "");
          str = str.replace("'", "");
         str = str.replace(".", "");
+        str = str.replace(";", "");
         str = str.replace("(", "");
         str = str.replace(")", "");
         str = str.replace("%", " ");
         str = str.replace("/", "");
-        str = str.replace("+", "");
+        str = str.replace("+", " ");
         str = str.replace("^", "");
         str = str.replace("\\", "");
         str = str.replace("-", "");
@@ -194,7 +339,31 @@ public class KeywordBasedTextScore {
         return str.split("\\s+");
     }
     
-    
+     
+     private void buildTopWordsMap(String top) {
+        if (top == null) {
+            System.out.println("top file not set");
+            System.exit(1);
+        }
+
+        String line;
+        String kw = "";
+
+        try {
+            Scanner scan = new Scanner(new BufferedReader(new FileReader(top)));
+            while (scan.hasNextLine()) {
+                line = scan.nextLine();
+                // process the lines
+                String[] lineArr = line.split(",");
+                this.topWordsMap.put(lineArr[0], Integer.parseInt(lineArr[1]));
+
+            }
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+        }
+    }// buildtopWordsMap
     
     public static void main(String[] args) {
         
@@ -215,9 +384,15 @@ public class KeywordBasedTextScore {
         topWordsMap.put("teen", 17);
         topWordsMap.put("jail", 15);
         topWordsMap.put("missing", 16);
+        //driver build topWordsMap
+       
         
-        KeywordBasedTextScore driver = new KeywordBasedTextScore("arrested",topWordsMap,Data.dataC,Data.dataNC,true);
-
+        boolean debug=false;
+        KeywordBasedTextScore driver = new KeywordBasedTextScore("arrested",Data.dataCCrime,Data.dataNC,debug);
+        driver.buildTopWordsMap(Data.topWordsFile);
+     
+        
+        
         //stop words util is set
         StopWordsUtil sw = new StopWordsUtil();
         
@@ -225,7 +400,7 @@ public class KeywordBasedTextScore {
         driver.setStopWordsMap(stopwordsMap_);
         
         driver.prepareCData();
-        //driver.prepareNCData();
+        driver.prepareNCData();
         driver.computeScores();
         
     } //main

@@ -105,7 +105,7 @@ public class TopicModelDriver {
                 //System.out.println(cat + " " + categ); 
                 mLDA.trainLDA(cat,categ, rawConFile, rawNonCFile );
              }
-         }
+         } 
         
 
     } //main
