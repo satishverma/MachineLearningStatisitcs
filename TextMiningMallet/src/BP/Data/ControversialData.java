@@ -71,9 +71,7 @@ public class ControversialData extends Data {
     
     private String _process(String input) {
         String result = null;
-        
-        
-        
+        result = BP.Utils.StringUtil.filterText(input);
         return result;
     } //_process
     
