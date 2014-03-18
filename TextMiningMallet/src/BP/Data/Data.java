@@ -56,4 +56,6 @@ public abstract class Data {
     
     //call this func to read and populate
     public abstract void prepareData(String path);
+    
+    public abstract void LDA();
 }

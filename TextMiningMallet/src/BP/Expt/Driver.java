@@ -5,8 +5,9 @@
 package BP.Expt;
 
 import BP.Data.ControversialData;
-import BP.Data.Data;
 import BP.Data.Definitions;
+import BP.Data.NonControversialData;
+import BP.Data.Data;
 
 /**
  *
@@ -28,11 +29,25 @@ public class Driver {
          *   
          */
         
-         Data data = new ControversialData();
-         data.setDebugOn();   
-         data.setSubCat(Data.SUBCATEGORY.CRIME);
-         data.setKW("Arrested");
-         data.prepareData(Definitions.dataC);
+        //Setup StopWords
+         BP.Utils.StringUtil.buildStopMap(Definitions.stopWordsFile);
+        
+         
+         //CONTROVERSIAL STUFF
+         Data dataC = new ControversialData();
+         dataC.setDebugOn();   
+         dataC.setSubCat(Data.SUBCATEGORY.CRIME);
+         dataC.setKW("Arrested");
+         //dataC.prepareData(Definitions.dataC);
+         //dataC.LDA();
+         
+         //NONCONTROVERSIAL STUFF
+         Data dataNC = new NonControversialData();
+         dataNC.setDebugOn();
+         dataNC.setSubCat(Data.SUBCATEGORY.CRIME);
+         dataNC.setKW("Arrested");
+         dataNC.prepareData(Definitions.dataNC);
+         dataNC.LDA();
          
         
     } //main
