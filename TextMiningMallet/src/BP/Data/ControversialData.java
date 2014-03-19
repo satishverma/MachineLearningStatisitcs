@@ -56,13 +56,13 @@ public class ControversialData extends Data {
         TopicModeling lda = new TopicModeling();
         lda.run(instanceList);
         try {
-            lda.analyzeAlphabet();
+            lda.analyzeAlphabet("C");
         } catch (IOException ex) {
             Logger.getLogger(ControversialData.class.getName()).log(Level.SEVERE, null, ex);
         }
-        lda.displayTopWords();
+        lda.displayTopWords("C");
         try {
-            lda.getTopWords(10000);
+            lda.getTopWords(10000,"C");
         } catch (IOException ex) {
             Logger.getLogger(ControversialData.class.getName()).log(Level.SEVERE, null, ex);
         }

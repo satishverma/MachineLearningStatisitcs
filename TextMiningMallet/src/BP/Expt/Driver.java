@@ -38,8 +38,8 @@ public class Driver {
          dataC.setDebugOn();   
          dataC.setSubCat(Data.SUBCATEGORY.CRIME);
          dataC.setKW("Arrested");
-         //dataC.prepareData(Definitions.dataC);
-         //dataC.LDA();
+         dataC.prepareData(Definitions.dataC);
+         dataC.LDA();
          
          //NONCONTROVERSIAL STUFF
          Data dataNC = new NonControversialData();

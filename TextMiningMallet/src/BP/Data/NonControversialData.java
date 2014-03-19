@@ -44,14 +44,14 @@ public class NonControversialData  extends Data {
         lda.run(instanceList);
         
         try {
-            lda.analyzeAlphabet();
+            lda.analyzeAlphabet("NC");
         } catch (IOException ex) {
             Logger.getLogger(ControversialData.class.getName()).log(Level.SEVERE, null, ex);
         }
-        lda.displayTopWords();
+        lda.displayTopWords("NC");
         
         try {
-            lda.getTopWords(10000);
+            lda.getTopWords(10000,"NC");
         } catch (IOException ex) {
             Logger.getLogger(ControversialData.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -118,7 +118,7 @@ public class NonControversialData  extends Data {
         String filteredResultByKW = filterKW(result);
         
         if(filteredResultByKW==null) return null;
-        System.out.println(filteredResultByKW);
+        //System.out.println(filteredResultByKW);
         
         return filteredResultByKW;
     } //_process

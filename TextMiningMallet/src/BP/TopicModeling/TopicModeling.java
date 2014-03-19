@@ -82,7 +82,7 @@ public class TopicModeling {
     
     
     
-    public void displayTopWords() {
+    public void displayTopWords(String dataType) {
         //EXPT 3 
         System.out.println("Model Num Topics " + model.numTopics);
         int nWords = 10000;
@@ -91,7 +91,7 @@ public class TopicModeling {
         
         Formatter formatter = null;
         try {
-            BufferedWriter bw = new BufferedWriter (new FileWriter(new File(Definitions.malletDataBpDir + "modelDisplayTopWords.txt")));
+            BufferedWriter bw = new BufferedWriter (new FileWriter(new File(Definitions.malletDataBpDir + "modelDisplayTopWords"+dataType+".txt")));
             formatter = new Formatter(bw, Locale.US);
             formatter.format("%s", topWords);
         } catch (IOException ex) {
@@ -117,8 +117,8 @@ public class TopicModeling {
     } //preparePipelist
      
      
-     public void analyzeAlphabet() throws IOException {
-        BufferedWriter bw = new BufferedWriter (new FileWriter(new File(Data.malletDataBpDir + "alphabet.txt")));
+     public void analyzeAlphabet(String dataType) throws IOException {
+        BufferedWriter bw = new BufferedWriter (new FileWriter(new File(Data.malletDataBpDir + "alphabet"+dataType+".txt")));
         
         Formatter formatter = new Formatter(bw, Locale.US);
         Alphabet alphabet = model.getAlphabet();
@@ -136,10 +136,10 @@ public class TopicModeling {
     }
    
    
-       public void getTopWords(int numWords_) throws IOException {
+       public void getTopWords(int numWords_,String dataType) throws IOException {
         
         StringBuilder sb = new StringBuilder();
-        BufferedWriter bw = new BufferedWriter (new FileWriter(new File(Definitions.malletDataBpDir + "rinput.txt")));
+        BufferedWriter bw = new BufferedWriter (new FileWriter(new File(Definitions.malletDataBpDir + "rinput"+dataType+".txt")));
         Formatter formatter = new Formatter(bw, Locale.US);
         
         
